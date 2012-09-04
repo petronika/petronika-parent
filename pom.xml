@@ -15,7 +15,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<slf4j.version>1.6.4</slf4j.version>
-		<jackrabbit.version>2.5.0</jackrabbit.version>
+		<jackrabbit.version>2.5.1</jackrabbit.version>
 	</properties>
 
 	<dependencyManagement>
@@ -90,9 +90,7 @@
 	</dependencyManagement>
 
 	<build>
-
-        <plugins>
-
+		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -102,7 +100,6 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -111,25 +108,86 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<compilerId>groovy-eclipse-compiler</compilerId>
-					<verbose>true</verbose>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.codehaus.groovy</groupId>
-						<artifactId>groovy-eclipse-compiler</artifactId>
-						<version>2.7.0-01</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-
-        </plugins>
-
+		</plugins>
 	</build>
+
+	<profiles>
+		<!--
+			1. Runs Groovy-Eclipse compiler for Groovy projects
+		-->
+		<profile>
+			<id>groovy-project</id>
+			<activation>
+				<file>
+					<exists>${basedir}/src/main/groovy</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<version>2.3.2</version>
+						<configuration>
+							<compilerId>groovy-eclipse-compiler</compilerId>
+							<verbose>false</verbose>
+						</configuration>
+						<dependencies>
+							<dependency>
+								<groupId>org.codehaus.groovy</groupId>
+								<artifactId>groovy-eclipse-compiler</artifactId>
+								<version>2.7.0-01</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>add-source</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/main/groovy</source>
+									</sources> 
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!--
+			1. Skips install for Grails projects
+		-->
+		<profile>
+			<id>grails-project</id>
+			<activation>
+				<file>
+					<exists>${basedir}/grails-app</exists>
+				</file>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-install-plugin</artifactId>
+							<executions>
+								<execution>
+									<id>default-install</id>
+									<phase>none</phase>
+								</execution>
+							</executions>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
